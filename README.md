@@ -1,5 +1,5 @@
 # SHA-256-Matlab
-Implements all of SHA-256 Algorithm
+Implements SHA-256 Algorithm
 
 ### Main Function
 ##### sha256( msg )

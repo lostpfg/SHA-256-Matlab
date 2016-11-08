@@ -1,7 +1,9 @@
-# SHA-256-Matlab
-Implements SHA-256 Algorithm
+### SHA-256-Matlab
 
-### Main Function
+A simple implementation of diggest algorithm written in matlab.
+
+### Example of ussage
+
 ##### sha256( msg )
 
     digest = sha256( 'abc' )                                 

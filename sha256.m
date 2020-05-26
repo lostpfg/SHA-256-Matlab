@@ -1,4 +1,7 @@
-function out = sha256( msg )
+function out = sha256(msg, dataType)
+    if(nargin == 1) % Default to string input
+        dataType = 1;
+    end
     % Initial Hash Values(8 constant 32-bit words).(§5.3.3)
     default_hash = [
                     '6a09e667';
@@ -30,7 +33,7 @@ function out = sha256( msg )
         '90befffa'; 'a4506ceb'; 'bef9a3f7'; 'c67178f2'
     ];
     % First padd the input message to be a multiple of 512(bits).(§5)
-    [padded_msg,padded_len] = padder( msg );
+    [padded_msg,padded_len] = padder(msg, dataType);
     % Split padded message to N (512-bit) blocks.(§6)
     [M,total_blocks] = split2block( padded_msg,padded_len );
     W = zeros( 64, 32 );
@@ -87,19 +90,28 @@ function out = sha256( msg )
     out = binaryVectorToHex( horzcat( H(1,:), H(2,:), H(3,:), H(4,:), H(5,:), H(6,:) ,H(7,:), H(8,:)  ) );
 end
 
-function [out,len] = padder( msg )
+function [out,len] = padder(msg, dataType)
     % Function padder : Padds the input message.(§5.1.1)
-    padded = []; % Initialize output.
-    l = length(msg)*8; % Length of the input message in dec.
-    for i = 1:length(msg) % First append message body.
-        padded = strcat(padded,dec2bin(msg(i),8));
+    if(dataType == 1)   % Input msg will be read as a string
+        padded = []; % Initialize output.
+        len = length(msg)*8; % Length of the input message in dec.
+        for i = 1:length(msg) % First append message body.
+            padded = strcat(padded,dec2bin(msg(i),8));
+        end
+    elseif(dataType == 2)   % Input msg will be read as a hex
+        padded = char('');  % Initialize padded as the correct data type
+        binVec = hexToBinaryVector(msg, (length(msg) * 4));  % Convert to binary, and keep leading zeros
+        len = length(binVec);   % Number of bits in the message
+        for n = 1:len
+            padded(n) = num2str(binVec(n)); % Convert the logical inputs to charcters, and append them to padded
+        end
     end
     padded( end + 1 ) = '1'; % Append bit '1' at the end of message body.
     % Calculate number of zeros to be added at the padded message.
-    k = mod( 447 - l , 512 );
+    k = mod( 447 - len , 512 );
     padded( end + 1 : end + k ) = '0';  % Append k bits '0' at the end of message body.
     % Append the length of the input message (in 64-bits).
-    padded( end + 1: end + 64 ) = reshape( dec2bin( l, 64 ), 1, [] );
+    padded( end + 1: end + 64 ) = reshape( dec2bin( len, 64 ), 1, [] );
     out = logical(padded(:)'-'0'); % Convery to logical array.
     len = length( padded ); % Return also length of the padded message.
 end
